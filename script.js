@@ -3,14 +3,17 @@
 
   var audio = document.getElementById("audio");
   var playBtn = document.getElementById("playBtn");
-  var iconPlay = document.getElementById("iconPlay");
-  var iconPause = document.getElementById("iconPause");
+  var pauseBtn = document.getElementById("pauseBtn");
   var seek = document.getElementById("seek");
   var currentEl = document.getElementById("current");
   var durationEl = document.getElementById("duration");
   var coverBtn = document.getElementById("coverBtn");
   var modal = document.getElementById("modal");
   var modalClose = document.getElementById("modalClose");
+  var subCurrent = document.getElementById("subCurrent");
+  var subNext = document.getElementById("subNext");
+
+  var lyrics = window.LYRICS || [];
 
   var MOBILE_MAX = 767;
 
@@ -25,18 +28,26 @@
     return m + ":" + (s < 10 ? "0" : "") + s;
   }
 
-  function togglePlay() {
-    if (audio.paused) {
-      audio.play();
-    } else {
-      audio.pause();
-    }
+  function syncButtons() {
+    var playing = !audio.paused && !audio.ended;
+    playBtn.hidden = playing;
+    pauseBtn.hidden = !playing;
   }
 
-  function syncPlayIcon() {
-    var playing = !audio.paused && !audio.ended;
-    iconPlay.hidden = playing;
-    iconPause.hidden = !playing;
+  function updateLyrics(time) {
+    var idx = -1;
+    for (var i = 0; i < lyrics.length; i++) {
+      if (time >= lyrics[i].t) idx = i;
+      else break;
+    }
+    if (idx < 0 || idx >= lyrics.length) {
+      subCurrent.textContent = "";
+      subNext.textContent = "";
+      return;
+    }
+    subCurrent.textContent = lyrics[idx].line;
+    subNext.textContent =
+      idx + 1 < lyrics.length ? lyrics[idx + 1].line : "";
   }
 
   function enterFullscreen() {
@@ -54,7 +65,7 @@
       d.exitFullscreen ||
       d.webkitExitFullscreen ||
       d.msExitFullscreen;
-    if (fn && d.fullscreenElement) fn.call(d);
+    if (fn && inFullscreen()) fn.call(d);
   }
 
   function inFullscreen() {
@@ -82,10 +93,17 @@
     if (inFullscreen()) exitFullscreen();
   }
 
-  playBtn.addEventListener("click", togglePlay);
-  audio.addEventListener("play", syncPlayIcon);
-  audio.addEventListener("pause", syncPlayIcon);
-  audio.addEventListener("ended", syncPlayIcon);
+  playBtn.addEventListener("click", function () {
+    audio.play();
+  });
+
+  pauseBtn.addEventListener("click", function () {
+    audio.pause();
+  });
+
+  audio.addEventListener("play", syncButtons);
+  audio.addEventListener("pause", syncButtons);
+  audio.addEventListener("ended", syncButtons);
 
   audio.addEventListener("loadedmetadata", function () {
     seek.max = audio.duration || 0;
@@ -97,11 +115,13 @@
     seek.value = audio.currentTime;
     currentEl.textContent = formatTime(audio.currentTime);
     if (seek.max !== audio.duration) seek.max = audio.duration;
+    updateLyrics(audio.currentTime);
   });
 
   seek.addEventListener("input", function () {
     audio.currentTime = parseFloat(seek.value);
     currentEl.textContent = formatTime(seek.value);
+    updateLyrics(audio.currentTime);
   });
 
   coverBtn.addEventListener("click", openImage);

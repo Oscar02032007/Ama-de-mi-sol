@@ -85,12 +85,17 @@ body {
   margin-top: 4px;
 }
 
-.controls .play-btn {
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.controls .ctl {
   width: 64px;
   height: 64px;
   border-radius: 50%;
   border: none;
-  background: var(--accent);
   color: #1a1205;
   display: grid;
   place-items: center;
@@ -98,12 +103,20 @@ body {
   transition: transform 0.15s ease, filter 0.15s ease;
 }
 
-.play-btn:hover {
+.controls .play-btn {
+  background: var(--accent);
+}
+
+.controls .pause-btn {
+  background: var(--accent);
+}
+
+.controls .ctl:hover {
   transform: scale(1.06);
   filter: brightness(1.06);
 }
 
-.play-btn:active {
+.controls .ctl:active {
   transform: scale(0.96);
 }
 
@@ -145,34 +158,86 @@ body {
   border: none;
 }
 
+/* ---- Modal ---- */
 .modal {
   position: fixed;
   inset: 0;
   z-index: 50;
   display: none;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.9);
-  padding: 24px;
+  background: rgba(0, 0, 0, 0.93);
+  padding: 16px;
 }
 
 .modal.open {
   display: flex;
 }
 
+.modal-phrase {
+  flex: 0 0 auto;
+  font-family: "Segoe Script", "Lucida Handwriting", "Brush Script MT", cursive;
+  font-size: clamp(1.7rem, 5vw, 3.1rem);
+  font-style: italic;
+  color: #ffd27a;
+  text-align: center;
+  line-height: 1.2;
+  margin: 6px 16px 10px;
+  text-shadow: 0 2px 20px rgba(255, 210, 122, 0.35), 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
 .modal-body {
-  max-width: min(90vw, 80vh);
-  max-height: 90vh;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: min(92vw, 78vh);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-body img {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 90vh;
+  max-height: 100%;
   object-fit: contain;
   border-radius: 10px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+}
+
+.modal-sub {
+  flex: 0 0 auto;
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 16px 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.sub-current {
+  font-size: clamp(1.15rem, 3.4vh, 1.7rem);
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
+  line-height: 1.25;
+}
+
+.sub-next {
+  font-size: clamp(0.92rem, 2.6vh, 1.15rem);
+  color: var(--muted);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  line-height: 1.25;
+}
+
+.sub-current:empty,
+.sub-next:empty {
+  display: none;
 }
 
 .modal-close {
@@ -189,6 +254,7 @@ body {
   line-height: 1;
   cursor: pointer;
   transition: background 0.15s ease;
+  z-index: 2;
 }
 
 .modal-close:hover {
@@ -197,28 +263,26 @@ body {
 
 /* ---- Modo kiosko (móvil en pantalla completa) ---- */
 .modal.kiosk {
-  padding: 0;
+  padding: 10px 0 0;
   background: #000;
 }
 
 .modal.kiosk .modal-body {
-  width: 100%;
-  height: 100%;
-  max-width: none;
+  max-width: 100%;
   max-height: none;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .modal.kiosk .modal-body img {
   width: 100%;
   height: 100%;
   max-height: none;
-  object-fit: contain;
   border-radius: 0;
   box-shadow: none;
+}
+
+.modal.kiosk .modal-sub {
+  min-height: 84px;
+  padding: 8px 14px 14px;
 }
 
 .modal.kiosk .modal-close {

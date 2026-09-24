@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0d0d12">
   <title>Ama De Mi Sol - Milo J</title>
-  <link rel="icon" href="portada.jpg" type="image/jpeg">
+  <link rel="icon" href="ojitodelabebe.jpeg" type="image/jpeg">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main class="player">
     <button type="button" class="cover-btn" id="coverBtn" aria-label="Ver portada a tamaño completo">
-      <img id="cover" src="portada.jpg" alt="Portada de Ama De Mi Sol">
+      <img id="cover" src="ojitodelabebe.jpeg" alt="Portada de Ama De Mi Sol">
     </button>
 
     <div class="info">
@@ -20,9 +20,11 @@
     </div>
 
     <div class="controls">
-      <button type="button" id="playBtn" class="play-btn" aria-label="Reproducir">
-        <svg id="iconPlay" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        <svg id="iconPause" viewBox="0 0 24 24" width="28" height="28" fill="currentColor" hidden><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      <button type="button" id="playBtn" class="ctl play-btn" aria-label="Reproducir">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button type="button" id="pauseBtn" class="ctl pause-btn" aria-label="Pausar" hidden>
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
       </button>
     </div>
 
@@ -37,11 +39,17 @@
 
   <div class="modal" id="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Portada">
     <button type="button" class="modal-close" id="modalClose" aria-label="Cerrar">&times;</button>
+    <p class="modal-phrase">(A ti te gusta Milo J y a mi me gustas tu)</p>
     <div class="modal-body">
-      <img src="portada.jpg" alt="Portada de Ama De Mi Sol">
+      <img src="ojitodelabebe.jpeg" alt="Portada de Ama De Mi Sol">
+    </div>
+    <div class="modal-sub" id="modalSub" aria-live="off">
+      <div class="sub-current" id="subCurrent"></div>
+      <div class="sub-next" id="subNext"></div>
     </div>
   </div>
 
+  <script src="lyrics.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

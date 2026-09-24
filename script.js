@@ -36,10 +36,16 @@
     return m + ":" + (s < 10 ? "0" : "") + s;
   }
 
+  function setHidden(elm, flag) {
+    if (!elm) return;
+    if (flag) elm.setAttribute("hidden", "");
+    else elm.removeAttribute("hidden");
+  }
+
   function syncButtons() {
     var playing = isPlaying;
-    if (iconPlay) iconPlay.hidden = playing;
-    if (iconPause) iconPause.hidden = !playing;
+    setHidden(iconPlay, playing);
+    setHidden(iconPause, !playing);
   }
 
   function updateLyrics(time) {

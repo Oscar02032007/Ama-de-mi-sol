@@ -49,9 +49,11 @@
     }
     var currentLine = "";
     var nextLine = "";
-    if (idx >= 0) {
+    if (idx >= 0 && lyrics[idx].line) {
       currentLine = lyrics[idx].line;
-      nextLine = idx + 1 < lyrics.length ? lyrics[idx + 1].line : "";
+      if (idx + 1 < lyrics.length && lyrics[idx + 1].line) {
+        nextLine = lyrics[idx + 1].line;
+      }
     }
     if (subCurrent) subCurrent.textContent = currentLine;
     if (subNext) subNext.textContent = nextLine;

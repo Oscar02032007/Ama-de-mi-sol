@@ -13,6 +13,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   height: 100%;
@@ -328,7 +332,17 @@ body {
     gap: 16px;
   }
 
-  .cover-btn {
+.page-phrase {
+  font-family: "Segoe Script", "Lucida Handwriting", "Brush Script MT", cursive;
+  font-style: italic;
+  font-size: clamp(1.3rem, 4.6vw, 1.9rem);
+  color: #ffd27a;
+  text-align: center;
+  line-height: 1.25;
+  text-shadow: 0 2px 14px rgba(255, 210, 122, 0.25), 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.cover-btn {
     max-width: none;
     border-radius: 12px;
   }

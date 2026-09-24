@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d12">
+  <title>QR - Ama De Mi Sol</title>
+  <link rel="icon" href="ojitodelabebe.jpeg" type="image/jpeg">
+  <style>
+    :root {
+      --bg: #0d0d12;
+      --surface: #14141b;
+      --border: #26262f;
+      --text: #f2f2f7;
+      --muted: #9a9aa8;
+      --accent: #f5a524;
+      --blue: #1d6fe6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(1200px 700px at 50% -10%, #1c1c28, var(--bg));
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      text-align: center;
+    }
+
+    h1 { font-size: 1.4rem; letter-spacing: 0.2px; }
+
+    .subtitle { color: var(--muted); font-size: 0.95rem; }
+
+    .qr-box {
+      width: 100%;
+      max-width: 340px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.4);
+    }
+
+    .qr-box canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .buttons {
+      width: 100%;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .buttons button {
+      flex: 1 1 46%;
+      min-width: 160px;
+      border: none;
+      border-radius: 999px;
+      padding: 13px 20px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.15s ease;
+      background: var(--accent);
+      color: #1a1205;
+    }
+
+    .buttons .ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .buttons button:hover { transform: translateY(-2px); filter: brightness(1.05); }
+    .buttons button:active { transform: scale(0.97); }
+
+    .url {
+      font-size: 0.82rem;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    .back {
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back:hover { text-decoration: underline; }
+
+    /* ---- Kiosko / pantalla completa ---- */
+    body.kiosk { padding: 0; }
+
+    body.kiosk .card {
+      max-width: 92vw;
+      max-height: 92vh;
+      border-radius: 0;
+      background: #000;
+      border: none;
+      box-shadow: none;
+      justify-content: center;
+    }
+
+    body.kiosk .card h1,
+    body.kiosk .card .subtitle,
+    body.kiosk .card .buttons,
+    body.kiosk .card .url,
+    body.kiosk .card .back {
+      display: none;
+    }
+
+    body.kiosk .qr-box {
+      max-width: none;
+      width: min(88vmin, 88vh);
+      background: #000;
+      padding: 0;
+      box-shadow: none;
+      border-radius: 0;
+    }
+
+    body.kiosk .qr-box canvas { width: 100%; height: auto; }
+
+    @media (max-width: 767px) {
+      body { padding: 12px; }
+      .card { border-radius: 16px; padding: 20px; gap: 14px; }
+      .buttons button { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Ama De Mi Sol</h1>
+    <p class="subtitle">Escanea el código para escuchar la canción</p>
+    <div class="qr-box">
+      <canvas id="qrCanvas"></canvas>
+    </div>
+    <div class="buttons">
+      <button type="button" id="downloadBtn">Descargar</button>
+      <button type="button" id="fullscreenBtn" class="ghost">Pantalla completa</button>
+    </div>
+    <p class="url">oscar02032007.github.io/Ama-de-mi-sol/</p>
+    <a class="back" href="./index.html">← Volver al reproductor</a>
+  </main>
+
+  <script src="qrcode.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      var TARGET = "https://oscar02032007.github.io/Ama-de-mi-sol/";
+      var QUIET = 4;
+      var EC = "Q";
+      var BLUE = "#1d6fe6";
+
+      var canvas = document.getElementById("qrCanvas");
+      var downloadBtn = document.getElementById("downloadBtn");
+      var fullscreenBtn = document.getElementById("fullscreenBtn");
+
+      function buildQr() {
+        var qr = qrcode(0, EC);
+        qr.addData(TARGET);
+        qr.make();
+        return qr;
+      }
+
+      function draw(target, qr) {
+        var count = qr.getModuleCount();
+        var total = count + QUIET * 2;
+        var cell = Math.max(1, Math.floor(target / total));
+        var dim = cell * total;
+
+        var c = document.createElement("canvas");
+        c.width = dim;
+        c.height = dim;
+        var ctx = c.getContext("2d");
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, dim, dim);
+        ctx.fillStyle = "#000000";
+        for (var r = 0; r < count; r++) {
+          for (var col = 0; col < count; col++) {
+            if (qr.isDark(r, col)) {
+              ctx.fillRect((col + QUIET) * cell, (r + QUIET) * cell, cell, cell);
+            }
+          }
+        }
+
+        drawLogo(ctx, dim);
+
+        return c;
+      }
+
+      function drawLogo(ctx, dim) {
+        var cx = dim / 2;
+        var cy = dim / 2;
+        var radius = Math.round(dim * 0.13); // ~26% del ancho: seguro con nivel Q
+
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius + dim * 0.012, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = BLUE;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "900 " + Math.round(radius * 1.15) + "px Arial, 'Segoe UI', sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("S", cx, cy + radius * 0.04);
+      }
+
+      function render() {
+        var qr = buildQr();
+        var view = draw(520, qr);
+        var c = canvas.getContext("2d");
+        var vw = view.width;
+        canvas.width = vw;
+        canvas.height = vw;
+        c.drawImage(view, 0, 0);
+      }
+
+      function download() {
+        var qr = buildQr();
+        var high = draw(1160, qr);
+        high.toBlob(function (blob) {
+          if (!blob) return;
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "qr-ama-de-mi-sol.png";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+        }, "image/png");
+      }
+
+      function toggleFullscreen() {
+        var d = document;
+        var active =
+          d.fullscreenElement ||
+          d.webkitFullscreenElement ||
+          d.msFullscreenElement;
+        if (active) {
+          var fn = d.exitFullscreen || d.webkitExitFullscreen || d.msExitFullscreen;
+          if (fn) fn.call(d);
+          return;
+        }
+        document.body.classList.add("kiosk");
+        var el0 = document.documentElement;
+        var req =
+          el0.requestFullscreen ||
+          el0.webkitRequestFullscreen ||
+          el0.msRequestFullscreen;
+        var p = req ? req.call(el0) : null;
+        if (p && p.catch) {
+          p.catch(function () { document.body.classList.remove("kiosk"); });
+        }
+      }
+
+      function onFullscreenChange() {
+        var d = document;
+        var active =
+          d.fullscreenElement ||
+          d.webkitFullscreenElement ||
+          d.msFullscreenElement;
+        if (!active) document.body.classList.remove("kiosk");
+      }
+
+      downloadBtn.addEventListener("click", download);
+      fullscreenBtn.addEventListener("click", toggleFullscreen);
+      document.addEventListener("fullscreenchange", onFullscreenChange);
+      document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+      document.addEventListener("MSFullscreenChange", onFullscreenChange);
+
+      render();
+    })();
+  </script>
+</body>
+</html>

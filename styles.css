@@ -160,6 +160,17 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.qr-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.qr-link:hover {
+  text-decoration: underline;
+}
+
 #seek {
   flex: 1;
   appearance: none;

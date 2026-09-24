@@ -7,7 +7,8 @@
 
   var audio = el("audio");
   var playBtn = el("playBtn");
-  var pauseBtn = el("pauseBtn");
+  var iconPlay = el("iconPlay");
+  var iconPause = el("iconPause");
   var seek = el("seek");
   var currentEl = el("current");
   var durationEl = el("duration");
@@ -16,6 +17,8 @@
   var modalClose = el("modalClose");
   var subCurrent = el("subCurrent");
   var subNext = el("subNext");
+  var pageSubCurrent = el("pageSubCurrent");
+  var pageSubNext = el("pageSubNext");
 
   var lyrics = window.LYRICS || [];
 
@@ -34,25 +37,26 @@
 
   function syncButtons() {
     var playing = audio && !audio.paused && !audio.ended;
-    if (playBtn) playBtn.hidden = playing;
-    if (pauseBtn) pauseBtn.hidden = !playing;
+    if (iconPlay) iconPlay.hidden = playing;
+    if (iconPause) iconPause.hidden = !playing;
   }
 
   function updateLyrics(time) {
-    if (!subCurrent || !subNext) return;
     var idx = -1;
     for (var i = 0; i < lyrics.length; i++) {
       if (time >= lyrics[i].t) idx = i;
       else break;
     }
-    if (idx < 0) {
-      subCurrent.textContent = "";
-      subNext.textContent = "";
-      return;
+    var currentLine = "";
+    var nextLine = "";
+    if (idx >= 0) {
+      currentLine = lyrics[idx].line;
+      nextLine = idx + 1 < lyrics.length ? lyrics[idx + 1].line : "";
     }
-    subCurrent.textContent = lyrics[idx].line;
-    subNext.textContent =
-      idx + 1 < lyrics.length ? lyrics[idx + 1].line : "";
+    if (subCurrent) subCurrent.textContent = currentLine;
+    if (subNext) subNext.textContent = nextLine;
+    if (pageSubCurrent) pageSubCurrent.textContent = currentLine;
+    if (pageSubNext) pageSubNext.textContent = nextLine;
   }
 
   function enterFullscreen() {
@@ -99,8 +103,13 @@
     if (inFullscreen()) exitFullscreen();
   }
 
-  if (playBtn) playBtn.addEventListener("click", function () { audio.play(); });
-  if (pauseBtn) pauseBtn.addEventListener("click", function () { audio.pause(); });
+  if (playBtn) playBtn.addEventListener("click", function () {
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  });
 
   if (audio) {
     audio.addEventListener("play", syncButtons);

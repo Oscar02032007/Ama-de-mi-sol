@@ -21,6 +21,7 @@
   var pageSubNext = el("pageSubNext");
 
   var lyrics = window.LYRICS || [];
+  var isPlaying = false;
 
   var MOBILE_MAX = 767;
 
@@ -36,7 +37,7 @@
   }
 
   function syncButtons() {
-    var playing = audio && !audio.paused && !audio.ended;
+    var playing = isPlaying;
     if (iconPlay) iconPlay.hidden = playing;
     if (iconPause) iconPause.hidden = !playing;
   }
@@ -106,17 +107,36 @@
   }
 
   if (playBtn) playBtn.addEventListener("click", function () {
-    if (audio.paused) {
-      audio.play();
-    } else {
+    if (isPlaying) {
       audio.pause();
+      isPlaying = false;
+      syncButtons();
+    } else {
+      isPlaying = true;
+      syncButtons();
+      var p = audio.play();
+      if (p && p.catch) {
+        p.catch(function () {
+          isPlaying = false;
+          syncButtons();
+        });
+      }
     }
   });
 
   if (audio) {
-    audio.addEventListener("play", syncButtons);
-    audio.addEventListener("pause", syncButtons);
-    audio.addEventListener("ended", syncButtons);
+    audio.addEventListener("play", function () {
+      isPlaying = true;
+      syncButtons();
+    });
+    audio.addEventListener("pause", function () {
+      isPlaying = false;
+      syncButtons();
+    });
+    audio.addEventListener("ended", function () {
+      isPlaying = false;
+      syncButtons();
+    });
     audio.addEventListener("loadedmetadata", function () {
       if (seek) seek.max = audio.duration || 0;
       if (durationEl) durationEl.textContent = formatTime(audio.duration);

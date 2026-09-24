@@ -1,17 +1,21 @@
 (function () {
   "use strict";
 
-  var audio = document.getElementById("audio");
-  var playBtn = document.getElementById("playBtn");
-  var pauseBtn = document.getElementById("pauseBtn");
-  var seek = document.getElementById("seek");
-  var currentEl = document.getElementById("current");
-  var durationEl = document.getElementById("duration");
-  var coverBtn = document.getElementById("coverBtn");
-  var modal = document.getElementById("modal");
-  var modalClose = document.getElementById("modalClose");
-  var subCurrent = document.getElementById("subCurrent");
-  var subNext = document.getElementById("subNext");
+  function el(id) {
+    return document.getElementById(id);
+  }
+
+  var audio = el("audio");
+  var playBtn = el("playBtn");
+  var pauseBtn = el("pauseBtn");
+  var seek = el("seek");
+  var currentEl = el("current");
+  var durationEl = el("duration");
+  var coverBtn = el("coverBtn");
+  var modal = el("modal");
+  var modalClose = el("modalClose");
+  var subCurrent = el("subCurrent");
+  var subNext = el("subNext");
 
   var lyrics = window.LYRICS || [];
 
@@ -29,18 +33,19 @@
   }
 
   function syncButtons() {
-    var playing = !audio.paused && !audio.ended;
-    playBtn.hidden = playing;
-    pauseBtn.hidden = !playing;
+    var playing = audio && !audio.paused && !audio.ended;
+    if (playBtn) playBtn.hidden = playing;
+    if (pauseBtn) pauseBtn.hidden = !playing;
   }
 
   function updateLyrics(time) {
+    if (!subCurrent || !subNext) return;
     var idx = -1;
     for (var i = 0; i < lyrics.length; i++) {
       if (time >= lyrics[i].t) idx = i;
       else break;
     }
-    if (idx < 0 || idx >= lyrics.length) {
+    if (idx < 0) {
       subCurrent.textContent = "";
       subNext.textContent = "";
       return;
@@ -51,12 +56,12 @@
   }
 
   function enterFullscreen() {
-    var el = document.documentElement;
+    var el0 = document.documentElement;
     var req =
-      el.requestFullscreen ||
-      el.webkitRequestFullscreen ||
-      el.msRequestFullscreen;
-    return req ? req.call(el) : Promise.reject(new Error("no fullscreen"));
+      el0.requestFullscreen ||
+      el0.webkitRequestFullscreen ||
+      el0.msRequestFullscreen;
+    return req ? req.call(el0) : Promise.reject(new Error("no fullscreen"));
   }
 
   function exitFullscreen() {
@@ -77,6 +82,7 @@
   }
 
   function openImage() {
+    if (!modal) return;
     modal.classList.add("open");
     if (isMobile()) {
       modal.classList.add("kiosk");
@@ -89,64 +95,72 @@
   }
 
   function closeImage() {
-    modal.classList.remove("open");
+    if (modal) modal.classList.remove("open");
     if (inFullscreen()) exitFullscreen();
   }
 
-  playBtn.addEventListener("click", function () {
-    audio.play();
-  });
+  if (playBtn) playBtn.addEventListener("click", function () { audio.play(); });
+  if (pauseBtn) pauseBtn.addEventListener("click", function () { audio.pause(); });
 
-  pauseBtn.addEventListener("click", function () {
-    audio.pause();
-  });
+  if (audio) {
+    audio.addEventListener("play", syncButtons);
+    audio.addEventListener("pause", syncButtons);
+    audio.addEventListener("ended", syncButtons);
+    audio.addEventListener("loadedmetadata", function () {
+      if (seek) seek.max = audio.duration || 0;
+      if (durationEl) durationEl.textContent = formatTime(audio.duration);
+      if (seek) seek.max = audio.duration;
+    });
+    audio.addEventListener("timeupdate", function () {
+      if (seek) {
+        seek.value = audio.currentTime;
+        if (seek.max !== audio.duration) seek.max = audio.duration;
+      }
+      if (currentEl) currentEl.textContent = formatTime(audio.currentTime);
+      updateLyrics(audio.currentTime);
+    });
+  }
 
-  audio.addEventListener("play", syncButtons);
-  audio.addEventListener("pause", syncButtons);
-  audio.addEventListener("ended", syncButtons);
+  if (seek) {
+    seek.addEventListener("input", function () {
+      if (audio) audio.currentTime = parseFloat(seek.value);
+      if (currentEl) currentEl.textContent = formatTime(seek.value);
+      updateLyrics(parseFloat(seek.value));
+    });
+  }
 
-  audio.addEventListener("loadedmetadata", function () {
-    seek.max = audio.duration || 0;
-    durationEl.textContent = formatTime(audio.duration);
-    seek.max = audio.duration;
-  });
-
-  audio.addEventListener("timeupdate", function () {
-    seek.value = audio.currentTime;
-    currentEl.textContent = formatTime(audio.currentTime);
-    if (seek.max !== audio.duration) seek.max = audio.duration;
-    updateLyrics(audio.currentTime);
-  });
-
-  seek.addEventListener("input", function () {
-    audio.currentTime = parseFloat(seek.value);
-    currentEl.textContent = formatTime(seek.value);
-    updateLyrics(audio.currentTime);
-  });
-
-  coverBtn.addEventListener("click", openImage);
-  modalClose.addEventListener("click", closeImage);
-
-  modal.addEventListener("click", function (e) {
-    if (e.target === modal) closeImage();
-  });
+  if (coverBtn) coverBtn.addEventListener("click", openImage);
+  if (modalClose) modalClose.addEventListener("click", closeImage);
+  if (modal) {
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) closeImage();
+    });
+  }
 
   document.addEventListener("fullscreenchange", function () {
     if (!inFullscreen()) {
-      modal.classList.remove("open");
-      modal.classList.remove("kiosk");
+      if (modal) {
+        modal.classList.remove("open");
+        modal.classList.remove("kiosk");
+      }
     }
   });
   document.addEventListener("webkitfullscreenchange", function () {
     if (!inFullscreen()) {
-      modal.classList.remove("open");
-      modal.classList.remove("kiosk");
+      if (modal) {
+        modal.classList.remove("open");
+        modal.classList.remove("kiosk");
+      }
     }
   });
   document.addEventListener("MSFullscreenChange", function () {
     if (!inFullscreen()) {
-      modal.classList.remove("open");
-      modal.classList.remove("kiosk");
+      if (modal) {
+        modal.classList.remove("open");
+        modal.classList.remove("kiosk");
+      }
     }
   });
+
+  syncButtons();
 })();
